@@ -1,11 +1,10 @@
 #pragma once
 
 ///////////////////////// TO-DO (1) //////////////////////////////
-  /// Include necessary header files
-  /// Hint:  Include what you use, use what you include
-  ///
-  /// Do not put anything else in this section, i.e. comments, classes, functions, etc.  Only #include directives
-
+#include <string>
+#include <vector>
+#include <memory>
+#include <algorithm>
 /////////////////////// END-TO-DO (1) ////////////////////////////
 
 
@@ -29,8 +28,6 @@ class GroceryItemDatabase
     GroceryItemDatabase & operator=( const GroceryItemDatabase & ) = delete;    // intentionally prohibit copy assignments
 
     ///////////////////////// TO-DO (2) //////////////////////////////
-      /// Private implementation details
-      /// Add any necessary private helper functions, member attributes, etc.
-
+    std::vector<GroceryItem> _dataStore; // Memory-resident data store
     /////////////////////// END-TO-DO (2) ////////////////////////////
 };

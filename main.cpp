@@ -136,25 +136,28 @@ namespace
   *********************************************************************************************************************************/
   void carefully_move_grocery_items( std::size_t quantity, std::stack<GroceryItem> & broken_cart, std::stack<GroceryItem> & working_cart, std::stack<GroceryItem> & spare_cart )
   {
-    ///////////////////////// TO-DO (1) //////////////////////////////
-      /// Implement the algorithm above.
-
-    /////////////////////// END-TO-DO (1) ////////////////////////////
+    if (quantity == 1)
+    {
+      working_cart.push(broken_cart.top());
+      broken_cart.pop();
+      trace(broken_cart, working_cart, spare_cart);
+    }
+    else
+    {
+      carefully_move_grocery_items(quantity - 1, broken_cart, spare_cart, working_cart);
+      working_cart.push(broken_cart.top());
+      broken_cart.pop();
+      trace(broken_cart, working_cart, spare_cart);
+      carefully_move_grocery_items(quantity - 1, spare_cart, working_cart, broken_cart);
+    }
   }
-
-
 
   // carefully_move_grocery_items() - starter
   void carefully_move_grocery_items( std::stack<GroceryItem> & from, std::stack<GroceryItem> & to )
   {
-    ///////////////////////// TO-DO (2) //////////////////////////////
-      /// Implement the starter function for the above algorithm.  If the "from" cart contains grocery items, move those grocery
-      /// items to the "to" cart while ensuring the breakable grocery items are always on top of the nonbreakable grocery items,
-      /// just like they already are in the "from" cart.  That is, call the above carefully_move_grocery_items function to start
-      /// moving grocery items recursively.  Call the above trace function just before calling carefully_move_grocery_items to get a
-      /// starting point reference in the movement report.
-
-    /////////////////////// END-TO-DO (2) ////////////////////////////
+    std::stack<GroceryItem> spare;
+    trace(from, to, spare);
+    carefully_move_grocery_items(from.size(), from, to, spare);
   }
 }    // namespace
 
@@ -167,13 +170,7 @@ int main( int argc, char * argv[] )
   try
   {
     // Snag an empty cart as I enter the grocery store
-    ///////////////////////// TO-DO (3) //////////////////////////////
-      /// Create an empty grocery item cart as a stack of grocery items and call it myCart.
-
-    /////////////////////// END-TO-DO (3) ////////////////////////////
-
-
-
+    std::stack<GroceryItem> myCart;
 
     // Shop for a while placing grocery items into my grocery item cart
     //
@@ -189,49 +186,45 @@ int main( int argc, char * argv[] )
     //      00038000291210   rice krispies    Kellogg's
     //      00075457129000   milk             any                     <===  heaviest item, put this on the bottom
 
-    ///////////////////////// TO-DO (4) //////////////////////////////
-
-    /////////////////////// END-TO-DO (4) ////////////////////////////
-
-
-
+    myCart.push(GroceryItem("eggs", "any", "00688267039317", 77.47));
+    myCart.push(GroceryItem("bread", "any", "00835841005255", 8.73));
+    myCart.push(GroceryItem("apple pie", "any", "09073649000493", 0.0));
+    myCart.push(GroceryItem("hotdogs", "Applegate Farms", "00025317533003", 15.99));
+    myCart.push(GroceryItem("rice krispies", "Kellogg's", "00038000291210", 40.37));
+    myCart.push(GroceryItem("milk", "any", "00075457129000", 30.28));
 
     // A wheel on my cart has just broken and I need to move grocery items to a new cart that works
-    ///////////////////////// TO-DO (5) //////////////////////////////
-      /// Create an empty grocery item cart as a stack of grocery items and call it workingCart.  Then carefully move the grocery
-      /// items in your now broken cart to this working cart by calling the above carefully_move_grocery_items function with two
-      /// arguments.
-
-    /////////////////////// END-TO-DO (5) ////////////////////////////
-
-
-
+    std::stack<GroceryItem> workingCart;
+    carefully_move_grocery_items(myCart, workingCart);
 
     // Time to checkout and pay for all this stuff.  Find a checkout line and start placing grocery items on the counter's conveyor belt
-    ///////////////////////// TO-DO (6) //////////////////////////////
-      /// Create an empty checkout counter as a queue of grocery items and call it checkoutCounter.  Then remove the grocery items
-      /// from your working cart and place them on the checkout counter, i.e., put them in this checkoutCounter queue.
-
-    /////////////////////// END-TO-DO (6) ////////////////////////////
-
-
-
+    std::queue<GroceryItem> checkoutCounter;
+    while (!workingCart.empty())
+    {
+      checkoutCounter.push(workingCart.top());
+      workingCart.pop();
+    }
 
     // Now add it all up and print a receipt
     double amountDue = 0.0;
     GroceryItemDatabase & worldWideDatabase = GroceryItemDatabase::instance();              // Get a reference to the world wide database of grocery items. The database
                                                                                             // contains the full description and price of the grocery item.
 
-    ///////////////////////// TO-DO (7) //////////////////////////////
-      /// For each grocery item in the checkout counter queue, find the grocery item by UPC in the world wide grocery item database.
-      /// If the grocery item on the counter is found in the database then accumulate the amount due and print the grocery item's full
-      /// description and price on the receipt (i.e. write the grocery item's full description and price to standard output).
-      /// Otherwise, print a message on the receipt that a description and price for the grocery item wasn't found and there will be
-      /// no charge.
-
-    /////////////////////// END-TO-DO (7) ////////////////////////////
-
-
+    while (!checkoutCounter.empty())
+    {
+      const auto &item = checkoutCounter.front();
+      GroceryItem *dbItem = worldWideDatabase.find(item.upcCode());
+      if (dbItem)
+      {
+        std::cout << *dbItem << '\n';
+        amountDue += dbItem->price();
+      }
+      else
+      {
+        std::cout << item.upcCode() << " (" << item.productName() << ") not found, so today is your lucky day - You get it free! Hooray!\n";
+      }
+      checkoutCounter.pop();
+    }
 
     // Now check the receipt - are you getting charged the correct amount?
     // You can either pass the expected total when you run the program by supplying a parameter, like this:

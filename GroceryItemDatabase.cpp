@@ -1,9 +1,9 @@
 ///////////////////////// TO-DO (1) //////////////////////////////
-  /// Include necessary header files
-  /// Hint:  Include what you use, use what you include
-  ///
-  /// Do not put anything else in this section, i.e. comments, classes, functions, etc.  Only #include directives
-
+#include "GroceryItemDatabase.hpp"
+#include "GroceryItem.hpp"
+#include <fstream>
+#include <iostream>
+#include <filesystem>
 /////////////////////// END-TO-DO (1) ////////////////////////////
 
 
@@ -61,9 +61,11 @@ GroceryItemDatabase::GroceryItemDatabase( const std::string & filename )
   //
 
   ///////////////////////// TO-DO (2) //////////////////////////////
-    /// Hint:  Use your GroceryItem's extraction operator to read GroceryItems, don't reinvent that here.
-    ///        Read grocery items until end of file pushing each grocery item into the data store as they're read.
-
+  GroceryItem item;
+  while (fin >> item)
+  {
+    _dataStore.push_back(std::move(item));
+  }
   /////////////////////// END-TO-DO (2) ////////////////////////////
 
   // Note:  The file is intentionally not explicitly closed.  The file is closed when fin goes out of scope - for whatever
@@ -80,14 +82,22 @@ GroceryItemDatabase::GroceryItemDatabase( const std::string & filename )
 
 
 ///////////////////////// TO-DO (3) //////////////////////////////
-  /// Implement the rest of the interface, including functions find (recursively) and size
-  ///
-  /// See the SinglyLinkedList's extended interface in our Sequence Container Implementation Examples (SinglyLinkedList.hpp) for a
-  /// recursive find function example. Instead of starting at the head of the list, you want to start at the beginning of your data
-  /// store.
-  ///
-  /// Programming note:  An O(n) operation, like searching an unsorted vector, would not generally be implemented recursively.  The
-  ///                    depth of recursion may be greater than the program's function call stack size.  But for this programming
-  ///                    exercise, getting familiar with recursion is a goal.
+GroceryItem *GroceryItemDatabase::find(const std::string &upc)
+{
+  return find(upc, 0);
+}
 
+GroceryItem *GroceryItemDatabase::find(const std::string &upc, std::size_t index)
+{
+  if (index >= _dataStore.size())
+    return nullptr;
+  if (_dataStore[index].upcCode() == upc)
+    return &_dataStore[index];
+  return find(upc, index + 1);
+}
+
+std::size_t GroceryItemDatabase::size() const
+{
+  return _dataStore.size();
+}
 /////////////////////// END-TO-DO (3) ////////////////////////////
